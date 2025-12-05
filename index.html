@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pawtastic - Registro de Mascota</title>
+    
+    <!-- Tailwind CSS para estilos rápidos y responsive -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Karla:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Configuración de fuentes personalizadas */
+        body {
+            font-family: 'Karla', sans-serif;
+            background-color: #e0e2e5; /* Fondo exterior grisáceo como en previews de diseño */
+        }
+        h1, h2, h3 {
+            font-family: 'DM Serif Display', serif;
+        }
+
+        /* Colores específicos del diseño */
+        .bg-sidebar { background-color: #474a5e; }
+        .bg-content { background-color: #f7eceb; }
+        .text-dark { color: #474a5e; }
+        .bg-active-option { background-color: #e2b8ba; } /* Color rosado oscuro de selección */
+        
+        /* Estilos para ocultar inputs de radio nativos pero mantener accesibilidad */
+        .custom-radio-input:checked + label {
+            background-color: #e2b8ba;
+            border-color: #e2b8ba;
+            color: #474a5e;
+            font-weight: 700;
+        }
+
+        /* Barra de progreso lateral */
+        .step-line::before {
+            content: '';
+            position: absolute;
+            left: 7px; /* Ajuste para centrar en el círculo */
+            top: 25px;
+            bottom: -35px;
+            width: 1px;
+            background-color: rgba(255,255,255,0.2);
+            z-index: 0;
+        }
+        .step-line:last-child::before {
+            display: none;
+        }
+
+        /* Ajustes para la imagen del perro */
+        .dog-mask {
+            mask-image: linear-gradient(to top, black 80%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to top, black 80%, transparent 100%);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 lg:p-8">
+
+    <!-- Contenedor Principal (Tarjeta) -->
+    <div class="bg-white w-full max-w-[1100px] h-auto lg:h-[700px] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col lg:flex-row relative">
+
+        <!-- BARRA LATERAL IZQUIERDA -->
+        <div class="bg-sidebar w-full lg:w-[35%] p-8 lg:p-12 flex flex-col justify-between relative overflow-hidden text-white">
+            
+            <!-- Logo -->
+            <div class="flex items-center gap-3 z-10 mb-8 lg:mb-0">
+                <div class="bg-[#e2b8ba] w-10 h-10 rounded-full flex items-center justify-center text-dark">
+                    <i class="fa-solid fa-paw text-lg"></i>
+                </div>
+                <span class="tracking-[0.15em] text-sm font-bold uppercase">Pawtastic</span>
+            </div>
+
+            <!-- Pasos de Progreso -->
+            <div class="flex flex-col gap-6 z-10 mb-auto lg:mt-16 pl-2">
+                
+                <!-- Paso 1: Completado -->
+                <div class="flex items-center gap-4 relative step-line opacity-50">
+                    <div class="w-4 h-4 rounded-full bg-gray-400 relative z-10"></div>
+                    <span class="uppercase text-xs tracking-widest">Human profile</span>
+                </div>
+
+                <!-- Paso 2: Activo -->
+                <div class="flex items-center gap-4 relative step-line">
+                    <div class="w-4 h-4 rounded-full bg-transparent border-2 border-white flex items-center justify-center relative z-10 box-content p-0.5">
+                        <div class="w-full h-full bg-white rounded-full"></div>
+                    </div>
+                    <span class="uppercase text-xs tracking-widest font-bold">Pet basics</span>
+                </div>
+
+                <!-- Paso 3: Pendiente -->
+                <div class="flex items-center gap-4 relative step-line opacity-50">
+                    <div class="w-4 h-4 rounded-full bg-gray-400 relative z-10"></div>
+                    <span class="uppercase text-xs tracking-widest">Pet details</span>
+                </div>
+
+                <!-- Paso 4: Pendiente -->
+                <div class="flex items-center gap-4 relative step-line opacity-50">
+                    <div class="w-4 h-4 rounded-full bg-gray-400 relative z-10"></div>
+                    <span class="uppercase text-xs tracking-widest">Confirm</span>
+                </div>
+            </div>
+
+            <!-- Enlace de guardar -->
+            <a href="#" class="text-xs border-b border-white/30 pb-0.5 self-start hover:text-[#e2b8ba] hover:border-[#e2b8ba] transition z-20 mt-8 lg:mt-0">Save and exit</a>
+
+            <!-- Imagen del Perro (Absoluta al fondo) -->
+            <!-- Usando una imagen placeholder de alta calidad de un Golden Retriever -->
+            <img src="https://images.unsplash.com/photo-1552053831-71594a27632d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" 
+                 alt="Golden Retriever" 
+                 class="absolute bottom-0 left-0 w-full h-[45%] object-cover opacity-60 mix-blend-luminosity dog-mask pointer-events-none">
+        </div>
+
+        <!-- CONTENIDO DERECHA (FORMULARIO) -->
+        <div class="bg-content w-full lg:w-[65%] flex flex-col relative">
+            
+            <!-- Área Scrollable del Formulario -->
+            <div class="flex-1 p-8 lg:p-16 overflow-y-auto">
+                
+                <!-- Título -->
+                <h1 class="text-3xl lg:text-4xl text-dark mb-10 lg:pr-20 leading-tight">
+                    Yay, we love dogs! Give us the basics about your pup.
+                </h1>
+
+                <form id="petForm" class="space-y-8">
+                    
+                    <!-- Fila 1: Nombre y Foto -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-end">
+                        <div class="flex flex-col gap-2">
+                            <label class="text-xs font-bold text-gray-400 uppercase tracking-wide">Name</label>
+                            <input type="text" placeholder="Pet's name" class="w-full p-3 pl-4 rounded border border-transparent focus:outline-none focus:ring-2 focus:ring-[#e2b8ba] placeholder-gray-300 bg-white text-dark">
+                        </div>
+                        
+                        <div class="flex items-center justify-center md:justify-start">
+                             <button type="button" class="flex items-center gap-3 text-gray-400 hover:text-dark transition group">
+                                <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:shadow-md transition">
+                                    <i class="fa-solid fa-camera text-dark/70"></i>
+                                </div>
+                                <span class="text-sm font-medium">Upload a photo</span>
+                             </button>
+                        </div>
+                    </div>
+
+                    <!-- Fila 2: Raza y Cumpleaños -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="flex flex-col gap-2">
+                            <label class="text-xs font-bold text-gray-400 uppercase tracking-wide">Breed</label>
+                            <input type="text" placeholder="Pet's breed" class="w-full p-3 pl-4 rounded border border-transparent focus:outline-none focus:ring-2 focus:ring-[#e2b8ba] placeholder-gray-300 bg-white text-dark">
+                        </div>
+                        
+                        <div class="flex flex-col gap-2">
+                            <label class="text-xs font-bold text-gray-400 uppercase tracking-wide">Birthday</label>
+                            <input type="text" placeholder="MM/DD/YYYY" class="w-full p-3 pl-4 rounded border border-transparent focus:outline-none focus:ring-2 focus:ring-[#e2b8ba] placeholder-gray-300 bg-white text-dark">
+                        </div>
+                    </div>
+
+                    <!-- Fila 3: Género y Esterilizado -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        
+                        <!-- Gender Toggle -->
+                        <div class="flex flex-col gap-2">
+                            <label class="text-xs font-bold text-gray-400 uppercase tracking-wide">Gender</label>
+                            <div class="flex bg-white rounded overflow-hidden">
+                                <div class="w-1/2">
+                                    <input type="radio" name="gender" id="female" class="custom-radio-input hidden" checked>
+                                    <label for="female" class="block w-full text-center py-3 text-sm text-gray-500 cursor-pointer hover:bg-gray-50 transition">Female</label>
+                                </div>
+                                <div class="w-1/2">
+                                    <input type="radio" name="gender" id="male" class="custom-radio-input hidden">
+                                    <label for="male" class="block w-full text-center py-3 text-sm text-gray-500 cursor-pointer hover:bg-gray-50 transition">Male</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Spayed/Neutered Toggle -->
+                        <div class="flex flex-col gap-2">
+                            <label class="text-xs font-bold text-gray-400 uppercase tracking-wide">Spayed or Neutered</label>
+                            <div class="flex bg-white rounded overflow-hidden">
+                                <div class="w-1/2">
+                                    <input type="radio" name="spayed" id="yes" class="custom-radio-input hidden" checked>
+                                    <label for="yes" class="block w-full text-center py-3 text-sm text-gray-500 cursor-pointer hover:bg-gray-50 transition">Yes</label>
+                                </div>
+                                <div class="w-1/2">
+                                    <input type="radio" name="spayed" id="no" class="custom-radio-input hidden">
+                                    <label for="no" class="block w-full text-center py-3 text-sm text-gray-500 cursor-pointer hover:bg-gray-50 transition">No</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fila 4: Peso (Selectores Múltiples) -->
+                    <div class="flex flex-col gap-2 pb-24 lg:pb-0">
+                        <label class="text-xs font-bold text-gray-400 uppercase tracking-wide">Weight</label>
+                        <div class="flex flex-wrap md:flex-nowrap bg-white rounded overflow-hidden">
+                            
+                            <div class="flex-1 min-w-[80px] border-r border-gray-100 last:border-0">
+                                <input type="radio" name="weight" id="w1" class="custom-radio-input hidden" checked>
+                                <label for="w1" class="block w-full text-center py-3 text-sm text-gray-500 cursor-pointer hover:bg-gray-50 transition whitespace-nowrap">0-25 lbs</label>
+                            </div>
+                            
+                            <div class="flex-1 min-w-[80px] border-r border-gray-100 last:border-0">
+                                <input type="radio" name="weight" id="w2" class="custom-radio-input hidden">
+                                <label for="w2" class="block w-full text-center py-3 text-sm text-gray-500 cursor-pointer hover:bg-gray-50 transition whitespace-nowrap">25-50 lbs</label>
+                            </div>
+                            
+                            <div class="flex-1 min-w-[80px] border-r border-gray-100 last:border-0">
+                                <input type="radio" name="weight" id="w3" class="custom-radio-input hidden">
+                                <label for="w3" class="block w-full text-center py-3 text-sm text-gray-500 cursor-pointer hover:bg-gray-50 transition whitespace-nowrap">50-100 lbs</label>
+                            </div>
+                            
+                            <div class="flex-1 min-w-[80px]">
+                                <input type="radio" name="weight" id="w4" class="custom-radio-input hidden">
+                                <label for="w4" class="block w-full text-center py-3 text-sm text-gray-500 cursor-pointer hover:bg-gray-50 transition whitespace-nowrap">100+ lbs</label>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Footer de Navegación -->
+            <div class="bg-white p-6 lg:px-16 lg:py-6 flex justify-between items-center sticky bottom-0 lg:absolute lg:bottom-0 lg:w-full border-t border-gray-100 shadow-lg lg:shadow-none z-30">
+                <button class="px-8 py-3 rounded-full border border-gray-300 text-gray-500 hover:border-dark hover:text-dark transition font-medium text-sm">
+                    Back
+                </button>
+                
+                <button onclick="nextStep()" class="bg-sidebar text-white px-10 py-3 rounded-full shadow-lg hover:shadow-xl hover:bg-[#3a3d4d] transition transform active:scale-95 font-medium text-sm">
+                    Next
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Pequeño script para interactividad -->
+    <script>
+        function nextStep() {
+            // Animación simple para el botón
+            const btn = document.querySelector('button[onclick="nextStep()"]');
+            const originalText = btn.innerText;
+            
+            btn.innerText = "Processing...";
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+            
+            setTimeout(() => {
+                alert("¡Información guardada! Pasando al siguiente paso (Pet Details)...");
+                btn.innerText = originalText;
+                btn.classList.remove('opacity-75', 'cursor-not-allowed');
+            }, 800);
+        }
+
+        // Funcionalidad adicional para mejorar inputs de fecha
+        const dateInput = document.querySelector('input[placeholder="MM/DD/YYYY"]');
+        dateInput.addEventListener('focus', function() {
+            this.type = 'date';
+        });
+        dateInput.addEventListener('blur', function() {
+            if(!this.value) this.type = 'text';
+        });
+    </script>
+</body>
+</html>

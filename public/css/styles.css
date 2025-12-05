@@ -1,0 +1,5 @@
+/* public/css/styles.css */
+body{ font-family: Arial, sans-serif; background:#f6f7fb; color:#111; }
+input, select, button { padding:8px; border:1px solid #ccc; border-radius:4px; }
+button { cursor:pointer; }
+table th { background:#f0f0f0; }
