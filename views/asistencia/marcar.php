@@ -91,14 +91,18 @@
                         <!-- Salida -->
                         <div class="option-btn" data-type="salida">Salida</div>
 
-                        <!-- Refrigerio inicio -->
-                        <div class="option-btn refrigerio-inicio hidden" data-type="refrigerio_inicio">
-                            Refrigerio - Inicio
-                        </div>
-
-                        <!-- Refrigerio fin -->
-                        <div class="option-btn refrigerio-fin hidden" data-type="refrigerio_fin">
-                            Refrigerio - Fin
+                        <!-- Refrigerio selector + acciones -->
+                        <div class="col-span-2">
+                            <label class="text-xs font-bold text-gray-500 uppercase">Refrigerio</label>
+                            <div class="flex items-center gap-3 mt-2">
+                                <select id="ref-num" class="p-2 rounded border bg-white">
+                                    <option value="1">Refrigerio 1</option>
+                                    <option value="2">Refrigerio 2</option>
+                                    <option value="3">Refrigerio 3</option>
+                                </select>
+                                <button id="ref-inicio" class="option-btn" data-action="inicio">Inicio</button>
+                                <button id="ref-fin" class="option-btn" data-action="fin">Fin</button>
+                            </div>
                         </div>
 
                     </div>
@@ -132,31 +136,11 @@ const cargoEl = document.getElementById('cargo');
 const msg = document.getElementById('msg');
 const tipoHidden = document.getElementById('tipo');
 
-// VALIDACIÓN HORARIA PARA REFRIGERIO
+// (Opcional) Validación horaria simple para refrigerios — actualmente dejamos visibles los controles
+// Puedes ajustar esta función para ocultar/mostrar según reglas del servidor.
 function validarRefrigerio() {
-    const now = new Date();
-    const hour = now.getHours();
-    const min = now.getMinutes();
-
-    const inicioBtn = document.querySelector(".refrigerio-inicio");
-    const finBtn = document.querySelector(".refrigerio-fin");
-
-    // Mostrar 12:00 - 12:59
-    if (hour === 12) {
-        inicioBtn.classList.remove("hidden");
-    } else {
-        inicioBtn.classList.add("hidden");
-    }
-
-    // Mostrar 13:00 - 13:59
-    if (hour === 13) {
-        finBtn.classList.remove("hidden");
-    } else {
-        finBtn.classList.add("hidden");
-    }
+    // por ahora no ocultamos nada; placeholder para lógica futura
 }
-
-// Ejecutar al cargar
 validarRefrigerio();
 
 // Selección de tipo
@@ -166,6 +150,26 @@ document.querySelectorAll(".option-btn").forEach(btn => {
         btn.classList.add("active");
         tipoHidden.value = btn.dataset.type;
     });
+});
+
+// Manejo específico de botones de refrigerio (construyen tipo: refrigerioN_inicio / refrigerioN_fin)
+const refNumEl = document.getElementById('ref-num');
+const refInicioBtn = document.getElementById('ref-inicio');
+const refFinBtn = document.getElementById('ref-fin');
+
+refInicioBtn.addEventListener('click', () => {
+    const n = refNumEl.value || '1';
+    // limpiar estados activos
+    document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('active'));
+    refInicioBtn.classList.add('active');
+    tipoHidden.value = `refrigerio${n}_inicio`;
+});
+
+refFinBtn.addEventListener('click', () => {
+    const n = refNumEl.value || '1';
+    document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('active'));
+    refFinBtn.classList.add('active');
+    tipoHidden.value = `refrigerio${n}_fin`;
 });
 
 // BUSCAR TRABAJADOR
@@ -201,6 +205,30 @@ document.getElementById('marcar').addEventListener('click', async () => {
     const dni = document.getElementById('dni').value.trim();
     if(!dni){ alert('Ingrese DNI'); return; }
 
+    // ==============================
+    // VALIDACIÓN DE HORARIO
+    // ==============================
+    const ahora = new Date();
+    const hora = ahora.getHours();
+
+    const entradaHora = 8;   // 08:00 AM permitido
+    const salidaHora = 17;   // 05:00 PM permitido
+
+    if (tipoHidden.value === "entrada") {
+        if (hora < entradaHora) {
+            msg.textContent = "❌ No puedes marcar entrada porque aún no inicia el horario.";
+            return;
+        }
+    }
+
+    if (tipoHidden.value === "salida") {
+        if (hora < salidaHora) {
+            msg.textContent = "❌ No puedes marcar salida todavía.";
+            return;
+        }
+    }
+    // ==============================
+
     msg.textContent = 'Marcando...';
 
     const fd = new FormData();
@@ -208,12 +236,33 @@ document.getElementById('marcar').addEventListener('click', async () => {
     fd.append('tipo', tipoHidden.value);
     fd.append('csrf', document.getElementById('csrf').value);
 
-    const res = await fetch('?r=asistencia/marcar_ajax', {
-        method: 'POST',
-        body: fd
-    });
+    // Intentar obtener geolocalización y enviarla si está disponible
+    const addCoordsAndSend = (coords) => {
+        if(coords){
+            fd.append('lat', coords.latitude);
+            fd.append('lng', coords.longitude);
+        }
+        fetch('?r=asistencia/marcar_ajax', {
+            method: 'POST',
+            body: fd
+        }).then(res => res.json()).then(json => {
+            msg.textContent = json.message || 'Marcado!';
+        }).catch(err => {
+            msg.textContent = 'Error al marcar';
+        });
+    };
 
-    const json = await res.json();
-    msg.textContent = json.message || 'Marcado!';
+    if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition(pos => {
+            addCoordsAndSend(pos.coords);
+        }, err => {
+            // permiso denegado o error -> enviar sin coords
+            addCoordsAndSend(null);
+        }, {timeout:5000});
+    } else {
+        addCoordsAndSend(null);
+    }
+    // limpiamos el tipo para evitar doble envío accidental
+    tipoHidden.value = '';
 });
 </script>

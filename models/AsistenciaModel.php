@@ -98,6 +98,48 @@ class AsistenciaModel extends Model {
         ];
     }
 
+    // Guarda o actualiza la fila única de la tabla `horarios`.
+    // $data puede contener keys: entrada, salida, ref1_inicio, ref1_fin, ref2_inicio, ref2_fin, ref3_inicio, ref3_fin
+    public function saveRules(array $data){
+        // Comprobamos si ya existe una fila
+        $stmt = $this->db->query("SELECT COUNT(*) AS c FROM horarios");
+        $r = $stmt->fetch();
+        $exists = ($r && $r['c'] > 0);
+
+        if($exists){
+            $sql = "UPDATE horarios SET entrada = :entrada, salida = :salida,
+                        ref1_inicio = :ref1_inicio, ref1_fin = :ref1_fin,
+                        ref2_inicio = :ref2_inicio, ref2_fin = :ref2_fin,
+                        ref3_inicio = :ref3_inicio, ref3_fin = :ref3_fin
+                    ";
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([
+                ':entrada' => $data['entrada'] ?? null,
+                ':salida' => $data['salida'] ?? null,
+                ':ref1_inicio' => $data['ref1_inicio'] ?? null,
+                ':ref1_fin' => $data['ref1_fin'] ?? null,
+                ':ref2_inicio' => $data['ref2_inicio'] ?? null,
+                ':ref2_fin' => $data['ref2_fin'] ?? null,
+                ':ref3_inicio' => $data['ref3_inicio'] ?? null,
+                ':ref3_fin' => $data['ref3_fin'] ?? null,
+            ]);
+        } else {
+            $sql = "INSERT INTO horarios (entrada, salida, ref1_inicio, ref1_fin, ref2_inicio, ref2_fin, ref3_inicio, ref3_fin)
+                    VALUES (:entrada, :salida, :ref1_inicio, :ref1_fin, :ref2_inicio, :ref2_fin, :ref3_inicio, :ref3_fin)";
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([
+                ':entrada' => $data['entrada'] ?? null,
+                ':salida' => $data['salida'] ?? null,
+                ':ref1_inicio' => $data['ref1_inicio'] ?? null,
+                ':ref1_fin' => $data['ref1_fin'] ?? null,
+                ':ref2_inicio' => $data['ref2_inicio'] ?? null,
+                ':ref2_fin' => $data['ref2_fin'] ?? null,
+                ':ref3_inicio' => $data['ref3_inicio'] ?? null,
+                ':ref3_fin' => $data['ref3_fin'] ?? null,
+            ]);
+        }
+    }
+
     // Comparación simple de horas "HH:MM:SS" (o "HH:MM")
     public function isHourInRange($horaActual, $min, $max){
         if(empty($min) || empty($max)) return false;
