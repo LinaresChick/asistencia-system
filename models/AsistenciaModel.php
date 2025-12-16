@@ -34,6 +34,21 @@ class AsistenciaModel extends Model {
         $r = $stmt->fetch();
         return $r && $r['c'] > 0;
     }
+    
+    // Comprueba si ya existe un registro del tipo dado para ese dni y fecha
+    public function hasRecord($dni, $fecha, $tipo){
+        $stmt = $this->db->prepare("SELECT COUNT(*) AS c FROM asistencias WHERE dni = :dni AND fecha = :fecha AND tipo = :tipo");
+        $stmt->execute([':dni'=>$dni, ':fecha'=>$fecha, ':tipo'=>$tipo]);
+        $r = $stmt->fetch();
+        return $r && $r['c'] > 0;
+    }
+
+    // Devuelve el último registro existente del tipo para dni+fecha
+    public function getRecord($dni, $fecha, $tipo){
+        $stmt = $this->db->prepare("SELECT * FROM asistencias WHERE dni = :dni AND fecha = :fecha AND tipo = :tipo ORDER BY id DESC LIMIT 1");
+        $stmt->execute([':dni'=>$dni, ':fecha'=>$fecha, ':tipo'=>$tipo]);
+        return $stmt->fetch();
+    }
 
     // Comprueba si existe entrada hoy por empleado_id
     public function buscarEntradaByEmpleado($empleado_id, $fecha){
@@ -110,7 +125,8 @@ class AsistenciaModel extends Model {
             $sql = "UPDATE horarios SET entrada = :entrada, salida = :salida,
                         ref1_inicio = :ref1_inicio, ref1_fin = :ref1_fin,
                         ref2_inicio = :ref2_inicio, ref2_fin = :ref2_fin,
-                        ref3_inicio = :ref3_inicio, ref3_fin = :ref3_fin
+                        ref3_inicio = :ref3_inicio, ref3_fin = :ref3_fin,
+                        vigente_desde = :vigente_desde, vigente_hasta = :vigente_hasta
                     ";
             $stmt = $this->db->prepare($sql);
             return $stmt->execute([
@@ -122,10 +138,12 @@ class AsistenciaModel extends Model {
                 ':ref2_fin' => $data['ref2_fin'] ?? null,
                 ':ref3_inicio' => $data['ref3_inicio'] ?? null,
                 ':ref3_fin' => $data['ref3_fin'] ?? null,
+                ':vigente_desde' => $data['vigente_desde'] ?: null,
+                ':vigente_hasta' => $data['vigente_hasta'] ?: null,
             ]);
         } else {
-            $sql = "INSERT INTO horarios (entrada, salida, ref1_inicio, ref1_fin, ref2_inicio, ref2_fin, ref3_inicio, ref3_fin)
-                    VALUES (:entrada, :salida, :ref1_inicio, :ref1_fin, :ref2_inicio, :ref2_fin, :ref3_inicio, :ref3_fin)";
+            $sql = "INSERT INTO horarios (entrada, salida, ref1_inicio, ref1_fin, ref2_inicio, ref2_fin, ref3_inicio, ref3_fin, vigente_desde, vigente_hasta)
+                    VALUES (:entrada, :salida, :ref1_inicio, :ref1_fin, :ref2_inicio, :ref2_fin, :ref3_inicio, :ref3_fin, :vigente_desde, :vigente_hasta)";
             $stmt = $this->db->prepare($sql);
             return $stmt->execute([
                 ':entrada' => $data['entrada'] ?? null,
@@ -136,8 +154,22 @@ class AsistenciaModel extends Model {
                 ':ref2_fin' => $data['ref2_fin'] ?? null,
                 ':ref3_inicio' => $data['ref3_inicio'] ?? null,
                 ':ref3_fin' => $data['ref3_fin'] ?? null,
+                ':vigente_desde' => $data['vigente_desde'] ?: null,
+                ':vigente_hasta' => $data['vigente_hasta'] ?: null,
             ]);
         }
+    }
+
+    // Obtener el horario actual guardado
+    public function getSchedule(){
+        $stmt = $this->db->query("SELECT * FROM horarios LIMIT 1");
+        return $stmt->fetch();
+    }
+
+    // Eliminar todos los horarios (para crear uno nuevo)
+    public function deleteSchedule(){
+        $stmt = $this->db->prepare("DELETE FROM horarios");
+        return $stmt->execute();
     }
 
     // Comparación simple de horas "HH:MM:SS" (o "HH:MM")

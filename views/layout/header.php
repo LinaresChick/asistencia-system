@@ -96,6 +96,13 @@ window.BASE_URL = '/index.php';
                 <span>Asistencias</span>
             </button>
 
+            <!-- CONFIGURACIÓN -->
+            <button onclick="window.location='?r=admin/config'"
+                class="nav-item nav-item-inactive flex items-center gap-2 lg:gap-3 px-5 lg:px-8 py-3 lg:py-4 rounded-full text-sm lg:text-lg font-medium animate-fade-in">
+                <i class="fa-solid fa-cog text-base lg:text-xl"></i>
+                <span>Config</span>
+            </button>
+
             <!-- SALIR -->
             <button onclick="window.location='?r=admin/logout'"
                 class="nav-item nav-item-active flex items-center gap-2 lg:gap-3 px-6 lg:px-10 py-3 lg:py-4 rounded-full text-sm lg:text-lg font-medium animate-fade-in">

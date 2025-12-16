@@ -11,7 +11,7 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
 
     <!-- FORMULARIO DE REGISTRO -->
-    <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100 order-2 lg:order-1">
+    <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100 order-1 lg:order-1">
 
         <h2 class="text-xl font-semibold text-gray-700 mb-4">Registrar empleado</h2>
 
@@ -56,14 +56,37 @@
     </div>
 
     <!-- LISTA DE EMPLEADOS -->
-    <div class="lg:col-span-2 order-1 lg:order-2">
+    <div class="lg:col-span-2 order-2 lg:order-2">
 
-        <!-- FAB flotante en móvil -->
-        <div class="flex justify-end mb-4 lg:hidden">
-            <button onclick="window.scrollTo({top:0,behavior:'smooth'});"
-                class="w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center text-2xl shadow-lg hover:bg-blue-700 transition fixed bottom-6 right-6 z-50">
-                <i class="fa-solid fa-plus"></i>
+        <!-- Botón móvil: Ver empleados -->
+        <div class="flex justify-center mb-4 lg:hidden">
+            <button id="btnToggleEmpleados"
+                class="px-5 py-3 bg-green-600 text-white rounded-full shadow hover:bg-green-700 transition">
+                Ver empleados
             </button>
+        </div>
+
+        <!-- Modal / panel móvil con lista vertical -->
+        <div id="modalEmpleados" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 items-start">
+            <div class="bg-white w-full h-full overflow-auto p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold">Empleados</h3>
+                    <button id="btnCloseEmpleados" class="text-gray-600 px-3 py-2 rounded hover:bg-gray-100">Cerrar</button>
+                </div>
+
+                <div class="space-y-4">
+                    <?php foreach($empleados as $e): ?>
+                    <div class="p-4 rounded-xl border bg-gray-50">
+                        <div class="text-3xl">👤</div>
+                        <div class="mt-2">
+                            <div class="font-semibold text-lg"><?php echo htmlspecialchars($e['apellidos'] . ', ' . $e['nombres']); ?></div>
+                            <div class="text-sm text-gray-600">DNI: <?php echo htmlspecialchars($e['dni']); ?></div>
+                            <div class="text-sm text-blue-700 font-medium mt-2"><?php echo htmlspecialchars($e['cargo']); ?></div>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
         </div>
 
         <!-- GRID RESPONSIVE DE CARDS -->
@@ -104,6 +127,31 @@
                 </div>
 
             </div>
+
+                <script>
+                // Toggle modal lista empleados (móvil)
+                (function(){
+                    var btn = document.getElementById('btnToggleEmpleados');
+                    var modal = document.getElementById('modalEmpleados');
+                    var btnClose = document.getElementById('btnCloseEmpleados');
+                    if(!btn || !modal) return;
+
+                    function openModal(){
+                        modal.classList.remove('hidden');
+                        modal.classList.add('flex');
+                        document.body.style.overflow = 'hidden';
+                    }
+                    function closeModal(){
+                        modal.classList.add('hidden');
+                        modal.classList.remove('flex');
+                        document.body.style.overflow = '';
+                    }
+
+                    btn.addEventListener('click', function(e){ e.preventDefault(); openModal(); });
+                    if(btnClose) btnClose.addEventListener('click', function(e){ e.preventDefault(); closeModal(); });
+                    modal.addEventListener('click', function(e){ if(e.target === modal) closeModal(); });
+                })();
+                </script>
             <?php endforeach; ?>
 
         </div>

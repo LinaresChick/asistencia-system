@@ -12,6 +12,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Leaflet for maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-sA+4Yk5fB0b3k9f+g0Yv5wY1bYxQY2fZ6k9gY1wQwRo=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-o9N1j7k9nFqYq0G8z3b1z2FZ7x1s9sY2l3r9g1wQwRo=" crossorigin=""></script>
     <style>
         body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%); }
         .card-gradient { background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); }
@@ -52,6 +55,64 @@
                 </button>
             </div>
         </div>
+
+        <!-- Horario Actual Section -->
+        <?php if(!empty($horario_actual)): ?>
+        <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl shadow-lg border-2 border-amber-200 p-6">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h3 class="text-lg font-bold text-amber-900 mb-2">
+                        <i class="fas fa-hourglass-start text-amber-600 mr-2"></i>
+                        Horario Actual Configurado
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-3">
+                        <div>
+                            <p class="text-xs font-semibold text-amber-700 uppercase">Entrada</p>
+                            <p class="text-lg font-bold text-amber-900"><?= htmlspecialchars($horario_actual['entrada'] ?? 'N/A') ?></p>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-amber-700 uppercase">Salida</p>
+                            <p class="text-lg font-bold text-amber-900"><?= htmlspecialchars($horario_actual['salida'] ?? 'N/A') ?></p>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-amber-700 uppercase">Ref 1</p>
+                            <p class="text-sm font-bold text-amber-900">
+                                <?= htmlspecialchars($horario_actual['ref1_inicio'] ?? '--') ?> - <?= htmlspecialchars($horario_actual['ref1_fin'] ?? '--') ?>
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-amber-700 uppercase">Ref 2</p>
+                            <p class="text-sm font-bold text-amber-900">
+                                <?= htmlspecialchars($horario_actual['ref2_inicio'] ?? '--') ?> - <?= htmlspecialchars($horario_actual['ref2_fin'] ?? '--') ?>
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-amber-700 uppercase">Ref 3</p>
+                            <p class="text-sm font-bold text-amber-900">
+                                <?= htmlspecialchars($horario_actual['ref3_inicio'] ?? '--') ?> - <?= htmlspecialchars($horario_actual['ref3_fin'] ?? '--') ?>
+                            </p>
+                        </div>
+
+                        <div class="col-span-3">
+                            <p class="text-xs font-semibold text-amber-700 uppercase">Vigencia</p>
+                            <p class="text-sm font-bold text-amber-900">
+                                Desde: <?= htmlspecialchars($horario_actual['vigente_desde'] ?? '--') ?> &nbsp;•&nbsp; Hasta: <?= htmlspecialchars($horario_actual['vigente_hasta'] ?? '--') ?>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <form method="POST" class="flex-shrink-0" onsubmit="return confirm('¿Eliminar el horario actual? Esto permitirá crear un nuevo horario.');">
+                    <input type="hidden" name="csrf" value="<?= $csrf ?? '' ?>">
+                    <input type="hidden" name="action" value="delete_schedule">
+                    <button type="submit" class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2">
+                        <i class="fas fa-trash"></i>
+                        Eliminar Horario
+                    </button>
+                </form>
+            </div>
+        </div>
+        <?php endif; ?>
 
         <!-- Statistics Cards -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -139,68 +200,26 @@
                                 Rango de Fechas
                             </h3>
                             
-                            <!-- Start Date -->
+                            <!-- Start Date (single date input) -->
                             <div class="mb-4">
                                 <label class="block text-xs font-medium text-gray-600 mb-2">
                                     <i class="fas fa-calendar-plus text-blue-500 mr-1"></i>
                                     Fecha Inicio
                                 </label>
-                                <div class="grid grid-cols-3 gap-2">
-                                    <div>
-                                        <input type="number" name="dia_inicio" min="1" max="31" required
-                                            placeholder="Día"
-                                            value="<?= !empty($_POST['dia_inicio']) ? htmlspecialchars($_POST['dia_inicio']) : date('d') ?>"
-                                            class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm input-focus transition">
-                                    </div>
-                                    <div>
-                                        <select name="mes_inicio" required class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm input-focus transition">
-                                            <option value="">Mes</option>
-                                            <?php for($m=1; $m<=12; $m++): ?>
-                                                <option value="<?= $m ?>" <?= (!empty($_POST['mes_inicio']) && $_POST['mes_inicio'] == $m) ? 'selected' : (date('n') == $m ? 'selected' : '') ?>>
-                                                    <?= date('F', mktime(0,0,0,$m,1)) ?>
-                                                </option>
-                                            <?php endfor; ?>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <input type="number" name="anio" required
-                                            value="<?= !empty($_POST['anio']) ? htmlspecialchars($_POST['anio']) : date('Y') ?>"
-                                            placeholder="Año"
-                                            class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm input-focus transition">
-                                    </div>
-                                </div>
+                                <input type="date" name="startDate" required
+                                    value="<?= htmlspecialchars($_POST['startDate'] ?? ($startDate ?? date('Y-m-d'))) ?>"
+                                    class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm input-focus transition">
                             </div>
 
-                            <!-- End Date -->
+                            <!-- End Date (single date input) -->
                             <div>
                                 <label class="block text-xs font-medium text-gray-600 mb-2">
                                     <i class="fas fa-calendar-minus text-blue-500 mr-1"></i>
                                     Fecha Fin
                                 </label>
-                                <div class="grid grid-cols-3 gap-2">
-                                    <div>
-                                        <input type="number" name="dia_fin" min="1" max="31" required
-                                            placeholder="Día"
-                                            value="<?= !empty($_POST['dia_fin']) ? htmlspecialchars($_POST['dia_fin']) : date('d') ?>"
-                                            class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm input-focus transition">
-                                    </div>
-                                    <div>
-                                        <select name="mes_fin" required class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm input-focus transition">
-                                            <option value="">Mes</option>
-                                            <?php for($m=1; $m<=12; $m++): ?>
-                                                <option value="<?= $m ?>" <?= (!empty($_POST['mes_fin']) && $_POST['mes_fin'] == $m) ? 'selected' : (date('n') == $m ? 'selected' : '') ?>>
-                                                    <?= date('F', mktime(0,0,0,$m,1)) ?>
-                                                </option>
-                                            <?php endfor; ?>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <input type="number" name="anio_fin"
-                                            value="<?= !empty($_POST['anio_fin']) ? htmlspecialchars($_POST['anio_fin']) : date('Y') ?>"
-                                            placeholder="Año"
-                                            class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm input-focus transition">
-                                    </div>
-                                </div>
+                                <input type="date" name="endDate" required
+                                    value="<?= htmlspecialchars($_POST['endDate'] ?? ($endDate ?? date('Y-m-d'))) ?>"
+                                    class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm input-focus transition">
                             </div>
                         </div>
 
@@ -573,13 +592,25 @@
                                         <td class="p-4">
                                             <div class="flex flex-col gap-1">
                                                 <?php if(!empty($row['lat_entrada']) && !empty($row['lng_entrada'])): ?>
-                                                <button class="text-xs px-2 py-1 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition flex items-center gap-1">
+                                                <button class="location-btn text-xs px-2 py-1 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition flex items-center gap-1"
+                                                    data-type="entrada"
+                                                    data-lat="<?= htmlspecialchars($row['lat_entrada']) ?>"
+                                                    data-lng="<?= htmlspecialchars($row['lng_entrada']) ?>"
+                                                    data-time="<?= htmlspecialchars($row['entrada'] ?? '') ?>"
+                                                    data-name="<?= htmlspecialchars($nombre_completo) ?>"
+                                                    data-dni="<?= htmlspecialchars($row['dni']) ?>">
                                                     <i class="fas fa-map-pin"></i>
                                                     Entrada
                                                 </button>
                                                 <?php endif; ?>
                                                 <?php if(!empty($row['lat_salida']) && !empty($row['lng_salida'])): ?>
-                                                <button class="text-xs px-2 py-1 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition flex items-center gap-1">
+                                                <button class="location-btn text-xs px-2 py-1 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition flex items-center gap-1"
+                                                    data-type="salida"
+                                                    data-lat="<?= htmlspecialchars($row['lat_salida']) ?>"
+                                                    data-lng="<?= htmlspecialchars($row['lng_salida']) ?>"
+                                                    data-time="<?= htmlspecialchars($row['salida'] ?? '') ?>"
+                                                    data-name="<?= htmlspecialchars($nombre_completo) ?>"
+                                                    data-dni="<?= htmlspecialchars($row['dni']) ?>">
                                                     <i class="fas fa-map-pin"></i>
                                                     Salida
                                                 </button>
@@ -646,6 +677,83 @@
                 });
             }
         });
+    </script>
+
+    <!-- Map Modal -->
+    <div id="mapModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-3xl overflow-hidden">
+            <div class="flex items-center justify-between p-4 border-b">
+                <div>
+                    <h3 id="mapModalTitle" class="font-bold text-lg">Ubicación</h3>
+                    <p id="mapModalSubtitle" class="text-sm text-gray-500">Detalle</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a id="openInMaps" href="#" target="_blank" class="text-sm text-blue-600 underline hidden">Abrir en Google Maps</a>
+                    <button id="closeMapModal" class="px-3 py-2 bg-gray-100 rounded-md">Cerrar</button>
+                </div>
+            </div>
+            <div class="p-4">
+                <div id="mapContainer" style="height:320px;" class="rounded"></div>
+                <div class="mt-3 text-sm text-gray-700">
+                    <div id="mapDetails">Lat: -- · Lng: -- · Hora: --</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function(){
+        let map, marker;
+        const modal = document.getElementById('mapModal');
+        const closeBtn = document.getElementById('closeMapModal');
+        const titleEl = document.getElementById('mapModalTitle');
+        const subtitleEl = document.getElementById('mapModalSubtitle');
+        const detailsEl = document.getElementById('mapDetails');
+        const openInMaps = document.getElementById('openInMaps');
+
+        const initMap = (lat, lng) => {
+            if(!map){
+                map = L.map('mapContainer').setView([lat, lng], 16);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '© OpenStreetMap'
+                }).addTo(map);
+                marker = L.marker([lat, lng]).addTo(map);
+            } else {
+                map.setView([lat, lng], 16);
+                marker.setLatLng([lat, lng]);
+            }
+        };
+
+        const openModal = ({lat,lng,type,name,dni,time}) => {
+            titleEl.textContent = `${type === 'entrada' ? 'Entrada' : 'Salida'} · ${name}`;
+            subtitleEl.textContent = `DNI: ${dni}`;
+            detailsEl.textContent = `Lat: ${parseFloat(lat).toFixed(6)} · Lng: ${parseFloat(lng).toFixed(6)} · Hora: ${time || '--'}`;
+            openInMaps.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(lat + ',' + lng)}`;
+            openInMaps.classList.remove('hidden');
+            modal.classList.remove('hidden');
+            // init map after modal visible
+            setTimeout(()=>{ initMap(parseFloat(lat), parseFloat(lng)); map.invalidateSize(); }, 80);
+        };
+
+        document.querySelectorAll('.location-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const lat = btn.getAttribute('data-lat');
+                const lng = btn.getAttribute('data-lng');
+                const type = btn.getAttribute('data-type');
+                const time = btn.getAttribute('data-time');
+                const name = btn.getAttribute('data-name');
+                const dni = btn.getAttribute('data-dni');
+                if(lat && lng){
+                    openModal({lat,lng,type,name,dni,time});
+                }
+            });
+        });
+
+        closeBtn.addEventListener('click', ()=>{ modal.classList.add('hidden'); });
+        // close on backdrop click
+        modal.addEventListener('click', (e)=>{ if(e.target === modal) modal.classList.add('hidden'); });
+    })();
     </script>
 
 </body>

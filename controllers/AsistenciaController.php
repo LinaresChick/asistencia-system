@@ -14,7 +14,9 @@ class AsistenciaController extends Controller {
 
     public function marcar(){
         // página con el form de marcación
-        $this->view('asistencia/marcar', ['csrf'=>$this->generateCsrf()]);
+        // obtener horario actual desde el modelo para mostrarlo en la vista
+        $horario = $this->asiModel->getSchedule();
+        $this->view('asistencia/marcar', ['csrf'=>$this->generateCsrf(), 'horario'=>$horario]);
     }
 
     // Endpoint AJAX que recibe dni + tipo + lat/lng
@@ -36,6 +38,13 @@ class AsistenciaController extends Controller {
         $lat  = $_POST['lat'] ?? null;
         $lng  = $_POST['lng'] ?? null;
 
+        // Para tipos de entrada/salida, exigir geolocalización
+        if(in_array($tipo, ['entrada','salida'])){
+            if(empty($lat) || empty($lng)){
+                echo json_encode(['success'=>false,'message'=>'Se requiere ubicación (GPS) para marcar entrada/salida']); exit;
+            }
+        }
+
         if(!$dni){
             echo json_encode(['success'=>false,'message'=>'DNI requerido']); exit;
         }
@@ -56,7 +65,18 @@ class AsistenciaController extends Controller {
             echo json_encode(['success'=>false,'message'=>'Tipo inválido']); exit;
         }
 
+        // permitir override de fecha solo si es admin (para pruebas/registro manual)
         $fecha = date('Y-m-d');
+        if(!empty($_POST['fecha'])){
+            // solo permitir si hay sesión de admin
+            if(!empty($_SESSION['admin_id'])){
+                $f = $_POST['fecha'];
+                $d = \DateTime::createFromFormat('Y-m-d', $f);
+                if($d && $d->format('Y-m-d') === $f){
+                    $fecha = $f;
+                }
+            }
+        }
         $hora  = date('H:i:s');
 
         // Obtener reglas horarias desde BD (tabla horarios)
@@ -97,6 +117,11 @@ class AsistenciaController extends Controller {
             if(!$this->asiModel->isHourInRange($hora, $reglas[$minKey], $reglas[$maxKey])){
                 echo json_encode(['success'=>false,'message'=>"Fuera del horario permitido para finalizar refrigerio {$num}"]); exit;
             }
+        }
+
+        // Evitar duplicados: si ya hay registro del mismo tipo para este dni/fecha
+        if($this->asiModel->hasRecord($dni, $fecha, $tipo)){
+            echo json_encode(['success'=>false,'message'=>'Ya se registró este tipo de marcación anteriormente']); exit;
         }
 
         // Estado: calculamos con tolerancia para entrada (15 minutos)

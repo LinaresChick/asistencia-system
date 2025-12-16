@@ -16,6 +16,13 @@ class Database {
             PDO::ATTR_EMULATE_PREPARES => false,
         ];
         $this->pdo = new PDO($dsn, $this->user, $this->pass, $opt);
+        // Asegurar que la sesión MySQL use la zona horaria de Lima (UTC-5)
+        try{
+            // Usamos offset fijo -05:00 porque MySQL puede no tener tablas de zona cargadas
+            $this->pdo->exec("SET time_zone = '-05:00'");
+        }catch(Exception $e){
+            // no fatal: si falla, continuamos sin cambiar time_zone
+        }
     }
 
     public function getConnection(){

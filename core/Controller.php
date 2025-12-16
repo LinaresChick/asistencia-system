@@ -1,4 +1,6 @@
 <?php
+// Forzar zona horaria de la aplicación a America/Lima (Perú)
+date_default_timezone_set('America/Lima');
 // core/Controller.php
 class Controller {
     protected function view($path, $data = []){
