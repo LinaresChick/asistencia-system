@@ -1,0 +1,30 @@
+2025-12-18 00:55:07
+=== Marcación de Faltas - 2025-12-18 ===
+✗ Óscar Iván Benavides Cruz (71901234) - FALTA marcada automáticamente
+✗ Ana Lucía Castillo Vega (70456789) - FALTA marcada automáticamente
+✗ Marco Antonio Espinoza Córdova (71567890) - FALTA marcada automáticamente
+✗ Rosa Elena Flores Medina (70678901) - FALTA marcada automáticamente
+✗ Valeria Sofía Gutiérrez Salas (71456789) - FALTA marcada automáticamente
+✗ María Fernanda López Ruiz (70234567) - FALTA marcada automáticamente
+✗ Hugo Daniel Mendoza Farfán (71345678) - FALTA marcada automáticamente
+✗ Carlos Pedro Miko Macro (74859612) - FALTA marcada automáticamente
+✗ Ricardo Andrés Morales León (70901234) - FALTA marcada automáticamente
+✗ Diana Paola Navarro Silva (71012345) - FALTA marcada automáticamente
+✗ Natalia Beatriz Pacheco Rentería (71678901) - FALTA marcada automáticamente
+✗ Claudia Verónica Peña Delgado (71890123) - FALTA marcada automáticamente
+✗ Juan Carlos Pérez Gómez (70123456) - FALTA marcada automáticamente
+✗ José Miguel Quispe Huamán (70567890) - FALTA marcada automáticamente
+✗ Luis Alberto Ramírez Torres (70345678) - FALTA marcada automáticamente
+✗ Melissa Andrea Reyes Aguilar (72012345) - FALTA marcada automáticamente
+✗ Paola Milagros Ríos Chávez (71234567) - FALTA marcada automáticamente
+✗ Jorge Luis Salazar Núñez (71789012) - FALTA marcada automáticamente
+✗ Pedro Antonio Sánchez Rojas (70789012) - FALTA marcada automáticamente
+✗ Fernando José Torres Castillo (71123456) - FALTA marcada automáticamente
+✗ Carmen Julia Vargas Pineda (70890123) - FALTA marcada automáticamente
+
+=== Resumen ===
+Empleados con entrada: 0
+Faltas marcadas: 21
+Total empleados: 21
+
+

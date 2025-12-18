@@ -17,13 +17,23 @@
     <div class="max-w-7xl mx-auto">
         <div class="flex items-center justify-between mb-6">
             <div>
-                <h1 class="text-2xl font-bold text-slate-800">Panel - Asistencias de hoy</h1>
-                <p class="text-sm text-slate-500 mt-1">Resumen y actividad reciente (<?php echo date('Y-m-d'); ?>)</p>
+                <h1 class="text-2xl font-bold text-slate-800">Panel - Asistencias</h1>
+                <p class="text-sm text-slate-500 mt-1">Resumen y actividad reciente (<?php echo htmlspecialchars($fecha ?? date('Y-m-d')); ?>)</p>
             </div>
             <div class="flex items-center gap-3">
+                <form method="GET" class="flex items-center gap-2">
+                    <input type="hidden" name="r" value="admin/dashboard">
+                    <label class="text-sm text-slate-600">Fecha:</label>
+                    <input type="date" name="fecha" value="<?= htmlspecialchars($fecha ?? date('Y-m-d')) ?>" class="px-3 py-2 border rounded-lg text-sm">
+                    <button type="submit" class="px-3 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm hover:bg-slate-300">Filtrar</button>
+                </form>
                 <a href="?r=admin/asistencias" class="inline-flex items-center gap-2 px-4 py-2 bg-white border rounded-lg shadow-sm hover:shadow-md">
                     <i class="fas fa-list text-slate-600"></i>
                     Ver historial
+                </a>
+                <a href="?r=export/index" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700">
+                    <i class="fas fa-file-excel"></i>
+                    Exportar
                 </a>
                 <button onclick="location.reload()" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700">
                     <i class="fas fa-sync-alt"></i> Actualizar
@@ -61,7 +71,7 @@
         <div class="bg-white rounded-lg shadow overflow-hidden">
             <div class="p-4 border-b">
                 <h2 class="font-semibold text-slate-800">Actividad reciente</h2>
-                <p class="text-sm text-slate-500">Últimas entradas y salidas registradas hoy</p>
+                <p class="text-sm text-slate-500">Últimas entradas y salidas registradas en <?= htmlspecialchars($fecha ?? date('Y-m-d')) ?></p>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full table-auto min-w-[800px]">

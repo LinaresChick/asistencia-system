@@ -35,9 +35,15 @@ class AdminController extends Controller {
     public function dashboard(){
         $this->ensureAuth();
         $asistenciaModel = new AsistenciaModel();
-        $hoy = date('Y-m-d');
-        $registros = $asistenciaModel->getByDate($hoy);
-        $this->view('admin/dashboard', ['registros'=>$registros]);
+        // Aceptar fecha desde GET o POST; si no, usar hoy
+        $fecha = $_GET['fecha'] ?? $_POST['fecha'] ?? date('Y-m-d');
+        // Validar formato Y-m-d
+        $d = \DateTime::createFromFormat('Y-m-d', $fecha);
+        if(!$d || $d->format('Y-m-d') !== $fecha){
+            $fecha = date('Y-m-d');
+        }
+        $registros = $asistenciaModel->getByDate($fecha);
+        $this->view('admin/dashboard', ['registros'=>$registros, 'fecha'=>$fecha]);
     }
 
     private function ensureAuth(){
