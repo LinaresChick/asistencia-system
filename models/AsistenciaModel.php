@@ -191,6 +191,96 @@ class AsistenciaModel extends Model {
         return $stmt->fetchAll();
     }
 
+    // Devuelve por cada empleado los tipos de marcación faltantes o fuera de ventana
+    // Retorna sólo empleados con al menos un tipo 'missing' o 'out_of_window' o 'tardanza'
+    public function getFaltantesByDate($fecha){
+        $rules = $this->getRules();
+        $empleados = $this->listarEmpleados();
+
+        $tipos = ['entrada','salida'];
+        // Añadir refrigerios sólo si están configurados
+        for($n=1;$n<=3;$n++){
+            $minKey = "ref{$n}_inicio";
+            $maxKey = "ref{$n}_fin";
+            if(!empty($rules[$minKey]) || !empty($rules[$maxKey])){
+                $tipos[] = "refrigerio{$n}_inicio";
+                $tipos[] = "refrigerio{$n}_fin";
+            }
+        }
+
+        $res = [];
+        foreach($empleados as $e){
+            $faltantes = [];
+            foreach($tipos as $tipo){
+                // buscar registro
+                $rec = $this->getRecord($e['dni'], $fecha, $tipo);
+                if(!$rec){
+                    $faltantes[$tipo] = 'missing';
+                    continue;
+                }
+
+                // si hay registro, validar si está dentro de la ventana según reglas
+                if($tipo === 'entrada'){
+                    if(!empty($rules['entrada'])){
+                        $ref = \DateTime::createFromFormat('H:i:s', $rules['entrada']);
+                        if($ref){
+                            $limite = clone $ref;
+                            $limite->modify('+15 minutes');
+                            $h = \DateTime::createFromFormat('H:i:s', $rec['hora']);
+                            if($h){
+                                if((int)$h->format('Hi') <= (int)$limite->format('Hi')){
+                                    // dentro de tolerancia -> ok
+                                } else {
+                                    $faltantes[$tipo] = 'tardanza';
+                                }
+                            }
+                        }
+                    }
+                } elseif($tipo === 'salida'){
+                    if(!empty($rules['salida'])){
+                        $ref = \DateTime::createFromFormat('H:i:s', $rules['salida']);
+                        $h = \DateTime::createFromFormat('H:i:s', $rec['hora']);
+                        if($ref && $h){
+                            if((int)$h->format('Hi') >= (int)$ref->format('Hi')){
+                                // ok
+                            } else {
+                                $faltantes[$tipo] = 'tardanza';
+                            }
+                        }
+                    }
+                } else {
+                    // refrigerioN_inicio / refrigerioN_fin
+                    if(preg_match('/refrigerio([123])_/', $tipo, $m)){
+                        $n = (int)$m[1];
+                        $min = $rules["ref{$n}_inicio"] ?? null;
+                        $max = $rules["ref{$n}_fin"] ?? null;
+                        if(!empty($min) && !empty($max)){
+                            // comparar hora del registro con min/max
+                            $horaReg = substr($rec['hora'],0,8);
+                            $minN = substr($min,0,8);
+                            $maxN = substr($max,0,8);
+                            if($horaReg < $minN || $horaReg > $maxN){
+                                $faltantes[$tipo] = 'out_of_window';
+                            }
+                        }
+                    }
+                }
+            }
+
+            if(!empty($faltantes)){
+                $res[] = [
+                    'empleado_id' => $e['id'],
+                    'dni' => $e['dni'],
+                    'nombres' => $e['nombres'],
+                    'apellidos' => $e['apellidos'],
+                    'faltantes' => $faltantes
+                ];
+            }
+        }
+
+        return $res;
+    }
+
     // Registrar falta automática (entrada con estado 'falta')
     public function registrarFalta($empleado_id, $dni, $fecha){
         $stmt = $this->db->prepare("
@@ -202,6 +292,39 @@ class AsistenciaModel extends Model {
             ':dni' => $dni,
             ':fecha' => $fecha
         ]);
+    }
+
+    // Guarda registros automáticos de falta para todos los que no marcaron entrada
+    // Retorna conteo de registros guardados
+    public function guardarFaltantesPorFecha($fecha){
+        $rules = $this->getRules();
+        $empleados = $this->listarEmpleados();
+        
+        $guardados = 0;
+        
+        foreach($empleados as $e){
+            // Verificar si tiene entrada para esa fecha
+            $hasEntrada = $this->hasEntradaToday($e['dni'], $fecha);
+            
+            if(!$hasEntrada){
+                // Verificar que no exista ya un registro de falta
+                $stmt = $this->db->prepare("
+                    SELECT COUNT(*) AS c FROM asistencias 
+                    WHERE dni = :dni AND fecha = :fecha AND estado = 'falta'
+                ");
+                $stmt->execute([':dni'=>$e['dni'], ':fecha'=>$fecha]);
+                $r = $stmt->fetch();
+                
+                if(!$r || $r['c'] == 0){
+                    // Registrar la falta
+                    if($this->registrarFalta($e['id'], $e['dni'], $fecha)){
+                        $guardados++;
+                    }
+                }
+            }
+        }
+        
+        return $guardados;
     }
 
     // ------------------------------------------------------------

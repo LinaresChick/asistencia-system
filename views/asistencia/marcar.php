@@ -1,131 +1,160 @@
 <?php
-// views/asistencia/marcar.php (multiplataforma)
+// views/asistencia/marcar.php
 ?>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<style>
-    .touch-target { touch-action: manipulation; }
-    .option-active { border-color: #10b981 !important; background: #ecfdf5 !important; }
-</style>
+<section class="px-4 pb-10 animate-fade-in">
+    <div class="max-w-3xl mx-auto">
 
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-50 to-slate-100 p-4">
-    <main class="w-full max-w-3xl bg-white rounded-2xl shadow-xl overflow-hidden">
-        <div class="lg:flex">
-            <aside class="hidden lg:block lg:w-1/3 bg-indigo-600 text-white p-8">
-                <h2 class="text-xl font-semibold">Marcación</h2>
-                <p class="text-sm opacity-90 mt-2">Busca al trabajador por DNI y registra entrada, salida o refrigerios.</p>
-            </aside>
+        <div class="bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden">
 
-            <section class="w-full lg:w-2/3 p-6">
-                <div class="mb-4 flex items-center justify-between">
-                    <h1 class="text-2xl font-bold text-slate-800">Marcar Asistencia</h1>
-                    <div class="text-sm text-slate-500">Multiplataforma</div>
-                </div>
+            <div class="lg:flex">
 
-                <div class="space-y-5">
-                    <?php if(!empty($horario)): ?>
-                    <div class="bg-yellow-50 border border-yellow-100 p-4 rounded-lg">
-                        <h3 class="text-sm font-semibold text-amber-900">Horario Actual Configurado</h3>
-                        <div class="mt-3 grid grid-cols-2 gap-3 text-sm">
-                            <div>
-                                <div class="text-xs text-slate-500">Entrada</div>
-                                <div class="text-lg font-bold text-amber-900"><?php echo htmlspecialchars($horario['entrada'] ?? '--'); ?></div>
-                            </div>
-                            <div>
-                                <div class="text-xs text-slate-500">Salida</div>
-                                <div class="text-lg font-bold text-amber-900"><?php echo htmlspecialchars($horario['salida'] ?? '--'); ?></div>
-                            </div>
+                <!-- ASIDE SOLO DESKTOP -->
+                <aside class="hidden lg:block lg:w-1/3 bg-gradient-to-br from-indigo-600 to-blue-600 text-white p-8">
+                    <h2 class="text-xl font-semibold">Marcación</h2>
+                    <p class="text-sm opacity-90 mt-2">
+                        Registra entradas, salidas y refrigerios desde cualquier dispositivo.
+                    </p>
+                </aside>
 
-                            <div class="col-span-2">
-                                <div class="text-xs text-slate-500">Ref 1</div>
-                                <div class="text-sm font-medium"><?php echo htmlspecialchars($horario['ref1_inicio'] ?? '--'); ?> - <?php echo htmlspecialchars($horario['ref1_fin'] ?? '--'); ?></div>
-                            </div>
+                <!-- CONTENIDO -->
+                <section class="w-full lg:w-2/3 p-6 space-y-6">
 
-                            <div class="col-span-2">
-                                <div class="text-xs text-slate-500">Ref 2</div>
-                                <div class="text-sm font-medium"><?php echo htmlspecialchars($horario['ref2_inicio'] ?? '--'); ?> - <?php echo htmlspecialchars($horario['ref2_fin'] ?? '--'); ?></div>
-                            </div>
+                    <!-- HEADER -->
+                    <div class="flex flex-wrap gap-3 items-center justify-between">
+                        <h1 class="text-2xl font-bold text-slate-800">
+                            Marcar Asistencia
+                        </h1>
 
-                            <div class="col-span-2">
-                                <div class="text-xs text-slate-500">Ref 3</div>
-                                <div class="text-sm font-medium"><?php echo htmlspecialchars($horario['ref3_inicio'] ?? '--'); ?> - <?php echo htmlspecialchars($horario['ref3_fin'] ?? '--'); ?></div>
-                            </div>
-                        </div>
+                        <a href="?r=empleado/login"
+                           class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-semibold hover:bg-emerald-700 transition">
+                            <i class="fas fa-user-circle"></i>
+                            Portal Empleado
+                        </a>
                     </div>
-                    <?php endif; ?>
-                    <div>
-                        <label for="dni" class="block text-sm font-medium text-slate-700">DNI</label>
-                        <?php if(!empty($_SESSION['admin_id'])): ?>
-                        <div class="mt-2 mb-2">
-                            <label class="block text-xs text-slate-500">Fecha (solo admin)</label>
-                            <input id="fecha" type="date" value="<?= date('Y-m-d') ?>" class="mt-1 rounded-lg border border-slate-200 px-3 py-2 text-sm">
+
+                    <!-- HORARIO -->
+                    <?php if (!empty($horario)): ?>
+                        <div class="bg-yellow-50 border border-yellow-100 p-4 rounded-xl">
+                            <h3 class="text-sm font-semibold text-amber-900 mb-2">
+                                Horario configurado
+                            </h3>
+                            <div class="grid grid-cols-2 gap-3 text-sm">
+                                <div>
+                                    <div class="text-xs text-slate-500">Entrada</div>
+                                    <div class="font-bold text-amber-900"><?= htmlspecialchars($horario['entrada'] ?? '--') ?></div>
+                                </div>
+                                <div>
+                                    <div class="text-xs text-slate-500">Salida</div>
+                                    <div class="font-bold text-amber-900"><?= htmlspecialchars($horario['salida'] ?? '--') ?></div>
+                                </div>
+
+                                <div class="col-span-2 text-xs text-slate-600">
+                                    R1: <?= htmlspecialchars($horario['ref1_inicio'] ?? '--') ?> - <?= htmlspecialchars($horario['ref1_fin'] ?? '--') ?>
+                                </div>
+                                <div class="col-span-2 text-xs text-slate-600">
+                                    R2: <?= htmlspecialchars($horario['ref2_inicio'] ?? '--') ?> - <?= htmlspecialchars($horario['ref2_fin'] ?? '--') ?>
+                                </div>
+                                <div class="col-span-2 text-xs text-slate-600">
+                                    R3: <?= htmlspecialchars($horario['ref3_inicio'] ?? '--') ?> - <?= htmlspecialchars($horario['ref3_fin'] ?? '--') ?>
+                                </div>
+                            </div>
                         </div>
+                    <?php endif; ?>
+
+                    <!-- DNI -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700">DNI</label>
+
+                        <?php if (!empty($_SESSION['admin_id'])): ?>
+                            <div class="mt-2">
+                                <label class="text-xs text-slate-500">Fecha (admin)</label>
+                                <input id="fecha" type="date"
+                                       value="<?= date('Y-m-d') ?>"
+                                       class="w-full mt-1 rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                            </div>
                         <?php endif; ?>
-                        <div class="mt-2 flex gap-3">
-                            <input id="dni" class="flex-1 rounded-lg border border-slate-200 px-4 py-3 text-lg focus:outline-none" inputmode="numeric" placeholder="Ej. 12345678" aria-label="DNI">
-                            <button id="buscar" class="inline-flex items-center gap-2 px-4 py-3 rounded-lg bg-indigo-600 text-white touch-target" aria-label="Buscar trabajador">
+
+                        <div class="mt-2 flex gap-2">
+                            <input id="dni"
+                                   inputmode="numeric"
+                                   placeholder="Ej. 12345678"
+                                   class="flex-1 rounded-xl border border-slate-300 px-4 py-3 text-lg focus:outline-none focus:border-indigo-500">
+
+                            <button id="buscar"
+                                    class="px-4 py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 transition">
                                 <i class="fas fa-search"></i>
-                                <span class="hidden sm:inline">Buscar</span>
                             </button>
                         </div>
                     </div>
 
-                    <div id="ficha" class="hidden bg-slate-50 border border-slate-100 rounded-lg p-4">
-                        <h2 class="text-sm font-semibold text-slate-800 mb-2">Ficha del trabajador</h2>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
-                            <div><div class="text-xs text-slate-500">Nombre</div><div id="nombre" class="font-medium"></div></div>
-                            <div><div class="text-xs text-slate-500">Apellido</div><div id="apellido" class="font-medium"></div></div>
-                            <div><div class="text-xs text-slate-500">Cargo</div><div id="cargo" class="font-medium">N/A</div></div>
+                    <!-- FICHA -->
+                    <div id="ficha" class="hidden bg-slate-50 border border-slate-100 rounded-xl p-4">
+                        <h2 class="text-sm font-semibold text-slate-800 mb-2">Trabajador</h2>
+                        <div class="grid sm:grid-cols-3 gap-3 text-sm">
+                            <div><span class="text-xs text-slate-500">Nombre</span><div id="nombre"></div></div>
+                            <div><span class="text-xs text-slate-500">Apellido</span><div id="apellido"></div></div>
+                            <div><span class="text-xs text-slate-500">Cargo</span><div id="cargo">N/A</div></div>
                         </div>
                     </div>
 
+                    <!-- TIPO -->
                     <div>
-                        <label class="block text-sm font-medium text-slate-700">Tipo de marcación</label>
-                        <div id="tipo-container" class="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            <button type="button" class="option-btn touch-target bg-white border border-slate-200 rounded-lg py-3 text-center font-semibold" data-type="entrada">Entrada</button>
-                            <button type="button" class="option-btn touch-target bg-white border border-slate-200 rounded-lg py-3 text-center font-semibold" data-type="salida">Salida</button>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">
+                            Tipo de marcación
+                        </label>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            <button type="button" class="option-btn border rounded-xl py-3 font-semibold" data-type="entrada">Entrada</button>
+                            <button type="button" class="option-btn border rounded-xl py-3 font-semibold" data-type="salida">Salida</button>
+
                             <div class="col-span-2 sm:col-span-1 flex gap-2">
-                                <select id="ref-num" class="rounded-lg border border-slate-200 px-3 py-2 w-1/3" aria-label="Seleccionar refrigerio">
+                                <select id="ref-num" class="border rounded-xl px-3 py-2 w-1/3">
                                     <option value="1">R1</option>
                                     <option value="2">R2</option>
                                     <option value="3">R3</option>
                                 </select>
-                                <button id="ref-inicio" type="button" class="option-btn touch-target flex-1 bg-white border border-slate-200 rounded-lg py-3 text-center font-semibold" data-action="inicio">Inicio</button>
-                                <button id="ref-fin" type="button" class="option-btn touch-target flex-1 bg-white border border-slate-200 rounded-lg py-3 text-center font-semibold" data-action="fin">Fin</button>
-                            </div>
-                        </div>
-                        <input type="hidden" id="tipo" aria-hidden="true">
-                        <!-- GPS prompt (visible cuando se selecciona Entrada/Salida) -->
-                        <div id="gpsPrompt" class="mt-3 p-3 bg-yellow-50 border border-yellow-100 rounded-lg hidden">
-                            <div class="flex items-center justify-between gap-3">
-                                <div class="text-sm text-yellow-800">Para marcar Entrada/Salida debe activarse la ubicación del dispositivo.</div>
-                                <div class="flex items-center gap-2">
-                                    <button id="requestLocationBtn" class="px-3 py-2 bg-yellow-600 text-white rounded-md">Solicitar ubicación</button>
-                                </div>
+                                <button id="ref-inicio" class="option-btn border rounded-xl py-3 flex-1">Inicio</button>
+                                <button id="ref-fin" class="option-btn border rounded-xl py-3 flex-1">Fin</button>
                             </div>
                         </div>
 
-                        <!-- Preview de ubicación (lat, lng, precisión, hora) -->
-                        <div id="locationPreview" class="mt-3 p-3 bg-slate-50 border border-slate-100 rounded-lg hidden">
-                            <div class="text-sm text-slate-600">Ubicación:</div>
-                            <div id="loc-coords" class="text-sm font-medium mt-1">--</div>
-                            <div id="loc-accuracy" class="text-xs text-slate-500 mt-1">--</div>
-                        </div>
+                        <input type="hidden" id="tipo">
                     </div>
 
+                    <!-- GPS -->
+                    <div id="gpsPrompt" class="hidden p-3 bg-yellow-50 border border-yellow-100 rounded-xl text-sm">
+                        Para marcar Entrada/Salida debes activar la ubicación.
+                        <button id="requestLocationBtn"
+                                class="ml-2 px-3 py-2 bg-yellow-600 text-white rounded-lg text-xs">
+                            Activar GPS
+                        </button>
+                    </div>
+
+                    <div id="locationPreview"
+                         class="hidden p-3 bg-slate-50 border border-slate-100 rounded-xl text-sm">
+                        <div id="loc-coords"></div>
+                        <div id="loc-accuracy" class="text-xs text-slate-500"></div>
+                    </div>
+
+                    <!-- MARCAR -->
                     <div>
                         <input type="hidden" id="csrf" value="<?= htmlspecialchars($csrf ?? '') ?>">
-                        <button id="marcar" class="w-full bg-emerald-600 text-white rounded-lg py-3 text-lg font-semibold touch-target">Marcar ahora</button>
+                        <button id="marcar"
+                                class="w-full bg-emerald-600 text-white py-4 rounded-xl text-lg font-bold hover:bg-emerald-700 transition">
+                            Marcar ahora
+                        </button>
                     </div>
 
-                    <div id="msg" role="status" aria-live="polite" class="min-h-[1.2rem] text-sm font-medium text-slate-700"></div>
+                    <div id="msg" class="text-sm font-medium text-slate-700"></div>
                     <div id="last-action" class="text-xs text-slate-500"></div>
-                </div>
-            </section>
+
+                </section>
+            </div>
         </div>
-    </main>
-</div>
+    </div>
+</section>
+
 
 <script>
 (() => {

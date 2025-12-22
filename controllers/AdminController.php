@@ -15,6 +15,16 @@ class AdminController extends Controller {
             if($admin && password_verify($password, $admin['password_hash'])){
                 $_SESSION['admin_id'] = $admin['id'];
                 $_SESSION['admin_name'] = $admin['nombre'] ?? $admin['username'];
+                
+                // Cargar contraseñas recientes en sesión (últimas 24h)
+                require_once __DIR__ . '/../models/AdminModel.php';
+                $adminModel = new AdminModel();
+                $recentPwds = $adminModel->getRecentPasswords($admin['id'], 86400); // 24h
+                $_SESSION['recent_passwords'] = [];
+                foreach($recentPwds as $entry){
+                    $_SESSION['recent_passwords'][$entry['empleado_id']] = $entry['password_plain'];
+                }
+                
                 $this->redirect('?r=admin/dashboard');
             } else {
                 $error = "Credenciales inválidas.";
@@ -78,6 +88,47 @@ class AdminController extends Controller {
         $m->delete($_POST['id']);
         $this->redirect('?r=admin/empleados');
     }
+
+    // Asignar contraseña a empleado (por admin)
+    public function empleado_set_password(){
+        $this->ensureAuth();
+        if($_SERVER['REQUEST_METHOD'] !== 'POST') $this->redirect('?r=admin/empleados');
+        if(!$this->verifyCsrf($_POST['csrf'] ?? '')) $this->redirect('?r=admin/empleados');
+
+        $id = $_POST['id'] ?? null;
+        $password = $_POST['password'] ?? null;
+        if(!$id || !$password) $this->redirect('?r=admin/empleados');
+
+        $m = new EmpleadoModel();
+        $m->setPassword($id, $password);
+        
+        // Guardar contraseña en log para persistencia
+        require_once __DIR__ . '/../models/AdminModel.php';
+        $adminModel = new AdminModel();
+        $adminModel->logPassword($_SESSION['admin_id'], $id, $password);
+        
+        // Obtener datos del empleado para mostrar en la vista (flash)
+        $empleado = $m->findById($id);
+        $_SESSION['assigned_password'] = [
+            'id' => $id,
+            'password' => $password,
+            'nombre' => ($empleado['apellidos'] ?? '') . ', ' . ($empleado['nombres'] ?? ''),
+            'dni' => $empleado['dni'] ?? '',
+            'cargo' => $empleado['cargo'] ?? ''
+        ];
+        // Guardar también en recent_passwords para que persista en sesión
+        if(!isset($_SESSION['recent_passwords'])) $_SESSION['recent_passwords'] = [];
+        $_SESSION['recent_passwords'][$id] = $password;
+        
+        $this->redirect('?r=admin/empleados');
+    }
+
+    // Reporte de faltantes
+    public function faltantes(){
+        $this->ensureAuth();
+        $this->view('admin/faltantes', ['csrf'=>$this->generateCsrf()]);
+    }
+
     public function asistencias(){
     $this->ensureAuth();
     $a = new AsistenciaModel();

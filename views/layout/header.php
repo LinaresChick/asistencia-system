@@ -96,6 +96,13 @@ window.BASE_URL = '/index.php';
                 <span>Asistencias</span>
             </button>
 
+            <!-- FALTANTES -->
+            <button onclick="window.location='?r=admin/faltantes'"
+                class="nav-item nav-item-inactive flex items-center gap-2 lg:gap-3 px-5 lg:px-8 py-3 lg:py-4 rounded-full text-sm lg:text-lg font-medium animate-fade-in">
+                <i class="fa-solid fa-exclamation-circle text-base lg:text-xl"></i>
+                <span>Faltantes</span>
+            </button>
+
             <!-- CONFIGURACIÓN -->
             <button onclick="window.location='?r=admin/config'"
                 class="nav-item nav-item-inactive flex items-center gap-2 lg:gap-3 px-5 lg:px-8 py-3 lg:py-4 rounded-full text-sm lg:text-lg font-medium animate-fade-in">
@@ -111,6 +118,13 @@ window.BASE_URL = '/index.php';
             </button>
 
         <?php else: ?>
+
+            <!-- ABOUT -->
+            <button onclick="window.location='?r=app/about'"
+                class="nav-item nav-item-inactive flex items-center gap-2 lg:gap-3 px-5 lg:px-8 py-3 lg:py-4 rounded-full text-sm lg:text-lg font-medium animate-fade-in">
+                <i class="fa-solid fa-circle-info text-base lg:text-xl"></i>
+                <span>About</span>
+            </button>
 
             <!-- ADMIN LOGIN -->
             <button onclick="window.location='?r=admin/login'"

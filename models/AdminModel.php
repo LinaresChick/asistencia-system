@@ -41,4 +41,27 @@ class AdminModel extends Model {
         $stmt = $this->db->prepare("DELETE FROM admins WHERE id = :id");
         return $stmt->execute([':id' => $id]);
     }
-}
+    // Guardar contraseña en log (para persistencia temporal)
+    public function logPassword($admin_id, $empleado_id, $password_plain){
+        $stmt = $this->db->prepare("
+            INSERT INTO admin_password_log (admin_id, empleado_id, password_plain)
+            VALUES (:admin_id, :empleado_id, :password_plain)
+        ");
+        return $stmt->execute([
+            ':admin_id' => $admin_id,
+            ':empleado_id' => $empleado_id,
+            ':password_plain' => $password_plain
+        ]);
+    }
+
+    // Obtener contraseñas recientes (últimas X segundos)
+    public function getRecentPasswords($admin_id, $seconds = 86400){
+        $stmt = $this->db->prepare("
+            SELECT empleado_id, password_plain
+            FROM admin_password_log
+            WHERE admin_id = :admin_id AND created_at >= DATE_SUB(NOW(), INTERVAL :seconds SECOND)
+            ORDER BY created_at DESC
+        ");
+        $stmt->execute([':admin_id' => $admin_id, ':seconds' => $seconds]);
+        return $stmt->fetchAll();
+    }}

@@ -149,6 +149,42 @@ class AsistenciaController extends Controller {
         exit;
     }
 
+    // Endpoint AJAX para obtener empleados que no marcaron según reglas en una fecha
+    public function faltantes_ajax(){
+        header('Content-Type: application/json; charset=utf-8');
+
+        if($_SERVER['REQUEST_METHOD'] !== 'POST'){
+            echo json_encode(['success'=>false,'message'=>'Método no permitido']); exit;
+        }
+
+        // CSRF (requiere sesión/permiso de admin para consultar)
+        $csrf = $_POST['csrf'] ?? '';
+        if(!$this->verifyCsrf($csrf)){
+            echo json_encode(['success'=>false,'message'=>'Token inválido']); exit;
+        }
+
+        // opcionalmente requerer admin
+        if(empty($_SESSION['admin_id'])){
+            echo json_encode(['success'=>false,'message'=>'Acceso denegado']); exit;
+        }
+
+        $fecha = $_POST['fecha'] ?? '';
+        if($fecha === '' || $fecha === 'hoy'){
+            $fecha = date('Y-m-d');
+        } elseif($fecha === 'mañana' || $fecha === 'manana'){
+            $fecha = date('Y-m-d', strtotime('+1 day'));
+        } else {
+            $d = \DateTime::createFromFormat('Y-m-d', $fecha);
+            if(!($d && $d->format('Y-m-d') === $fecha)){
+                echo json_encode(['success'=>false,'message'=>'Fecha inválida']); exit;
+            }
+        }
+
+        $faltantes = $this->asiModel->getFaltantesByDate($fecha);
+        echo json_encode(['success'=>true,'fecha'=>$fecha,'data'=>$faltantes]);
+        exit;
+    }
+
     // Extrae el número del refrigerio (1,2,3) desde el tipo 'refrigerioN_inicio' o 'refrigerioN_fin'
     private function extractRefrigerioNum($tipo){
         if(preg_match('/refrigerio([123])_/', $tipo, $m)) return (int)$m[1];
@@ -208,5 +244,74 @@ class AsistenciaController extends Controller {
         if(str_ends_with($tipo, '_fin')) return 'fin';
 
         return 'invalid';
+    }
+
+    // Endpoint AJAX para guardar faltantes automáticamente en la BD
+    public function guardar_faltantes_ajax(){
+        header('Content-Type: application/json; charset=utf-8');
+
+        if($_SERVER['REQUEST_METHOD'] !== 'POST'){
+            echo json_encode(['success'=>false,'message'=>'Método no permitido']); exit;
+        }
+
+        // CSRF + Auth
+        $csrf = $_POST['csrf'] ?? '';
+        if(!$this->verifyCsrf($csrf)){
+            echo json_encode(['success'=>false,'message'=>'Token inválido']); exit;
+        }
+
+        if(empty($_SESSION['admin_id'])){
+            echo json_encode(['success'=>false,'message'=>'Acceso denegado']); exit;
+        }
+
+        $fecha = $_POST['fecha'] ?? '';
+        if($fecha === '' || $fecha === 'hoy'){
+            $fecha = date('Y-m-d');
+        } elseif($fecha === 'mañana' || $fecha === 'manana'){
+            $fecha = date('Y-m-d', strtotime('+1 day'));
+        } else {
+            $d = \DateTime::createFromFormat('Y-m-d', $fecha);
+            if(!($d && $d->format('Y-m-d') === $fecha)){
+                echo json_encode(['success'=>false,'message'=>'Fecha inválida']); exit;
+            }
+        }
+
+        try {
+            $guardados = $this->asiModel->guardarFaltantesPorFecha($fecha);
+            echo json_encode(['success'=>true,'message'=>"Se guardaron $guardados registros de falta",'count'=>$guardados,'fecha'=>$fecha]);
+        } catch(Exception $e){
+            echo json_encode(['success'=>false,'message'=>'Error: '.$e->getMessage()]);
+        }
+        exit;
+    }
+
+    // Endpoint CRON automático (sin autenticación) - se ejecuta cada noche
+    public function cron_guardar_faltantes(){
+        header('Content-Type: application/json; charset=utf-8');
+
+        // Token de seguridad simple (para evitar acceso público descontrolado)
+        $tokenCron = $_GET['token'] ?? $_POST['token'] ?? '';
+        $tokenEsperado = md5('faltantes_cron_'.date('Y-m-d')); // Cambia cada día
+
+        if($tokenCron !== $tokenEsperado){
+            echo json_encode(['success'=>false,'message'=>'Token inválido']); 
+            exit;
+        }
+
+        $fecha = $_GET['fecha'] ?? $_POST['fecha'] ?? date('Y-m-d', strtotime('-1 day')); // Por defecto, ayer
+
+        try {
+            $guardados = $this->asiModel->guardarFaltantesPorFecha($fecha);
+            echo json_encode([
+                'success'=>true,
+                'message'=>"Cron: Se guardaron $guardados registros de falta",
+                'count'=>$guardados,
+                'fecha'=>$fecha,
+                'timestamp'=>date('Y-m-d H:i:s')
+            ]);
+        } catch(Exception $e){
+            echo json_encode(['success'=>false,'message'=>'Error: '.$e->getMessage()]);
+        }
+        exit;
     }
 }
