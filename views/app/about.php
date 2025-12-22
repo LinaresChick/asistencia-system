@@ -102,14 +102,17 @@
         <h3 class="text-2xl font-bold text-gray-800 mb-6">Contacto y Redes</h3>
         
         <div class="flex justify-center gap-6 mb-8">
-            <a href="#" class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 transition text-xl" title="GitHub">
+            <a href="https://github.com/LinaresChick" target="_blank" class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 transition text-xl" title="GitHub">
                 <i class="fa-brands fa-github"></i>
             </a>
-            <a href="#" class="w-12 h-12 bg-blue-400 text-white rounded-full flex items-center justify-center hover:bg-blue-500 transition text-xl" title="LinkedIn">
-                <i class="fa-brands fa-linkedin"></i>
+            <a href="https://www.facebook.com/share/1DWUvC1PM7/" target="_blank" class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 transition text-xl" title="Facebook">
+                <i class="fa-brands fa-facebook"></i>
             </a>
-            <a href="#" class="w-12 h-12 bg-red-600 text-white rounded-full flex items-center justify-center hover:bg-red-700 transition text-xl" title="Email">
-                <i class="fa-solid fa-envelope"></i>
+            <a href="https://www.instagram.com/niko_ascencio?igsh=MWd2dmk5MGl0aDlxNQ==" target="_blank" class="w-12 h-12 bg-pink-600 text-white rounded-full flex items-center justify-center hover:bg-pink-700 transition text-xl" title="Instagram">
+                <i class="fa-brands fa-instagram"></i>
+            </a>
+            <a href="https://wa.me/qr/N4L2VDZGCGXYJ1" target="_blank" class="w-12 h-12 bg-green-600 text-white rounded-full flex items-center justify-center hover:bg-green-700 transition text-xl" title="WhatsApp">
+                <i class="fa-brands fa-whatsapp"></i>
             </a>
         </div>
 
